@@ -262,7 +262,7 @@
             }
         },
         "baseUrl": {
-            "defaultValue": "https://github.com/mcrosstx/CiscoASAv_BYOL_4_NIC_HA",
+            "defaultValue": "https://raw.githubusercontent.com/mcrosstx/CiscoASAv_BYOL_4_NIC_HA/master/",
             "type": "string",
             "metadata": {
                 "artifactsBaseUrl": "",
