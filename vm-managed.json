@@ -26,12 +26,12 @@
    	"vmSize": {
       "type": "string"
     },
-   	"newStorageAccountName": {
-      "type": "string"
-    },
    	"osDiskMode": {
       "type": "string"
     },
+    "osDiskSKU": {
+        "type": "string"
+      },
    	"authenticationType": {
       "type": "string"
     },
@@ -98,7 +98,10 @@
                     },
                     "osDisk": {
                          "caching": "ReadWrite",
-                         "createOption": "FromImage"
+                         "createOption": "FromImage",
+                         "managedDisk": {
+                            "storageAccountType": "[parameters('osDiskSKU')]"
+                        }
                     }
                 },
                 "networkProfile": {
@@ -128,14 +131,7 @@
                             "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'),'-Nic3'))]"
                         }
                     ]
-                },
-                "diagnosticsProfile": {
-                    "bootDiagnostics": {
-                        "enabled": "true",
-                        "storageuri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName')), '2015-06-15').primaryEndpoints.blob)]"
-                    }
-                }
-               
+                }               
             }
         } 	  
   	  

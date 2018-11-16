@@ -155,6 +155,13 @@
                 "description": "Prefix for VM name - VMs will be prefix-A and prefix-B."
             }
         },
+        "availSet": {
+            "defaultValue": "availabilitySet",
+            "type": "string",
+            "metadata": {
+                "description": "Name for the Availability Set"
+            }
+        },
         "imageVersion": {
             "type": "string",
             "defaultValue": "99.2.18",
@@ -171,43 +178,21 @@
             "type": "string",
             "defaultValue": "managed",
             "allowedValues": [
-                "managed",
-                "unmanaged"
+                "managed"
             ],
             "metadata": {
                 "description": "Use managed or unmanaged osDisk (boot diagnostics will use unmanaged disks)"
             }
         },
-        "newStorageAccountName-A": {
-            "type": "string",
-            "metadata": {
-                "description": "Unique Name for the Storage Account ASAv-A's boot diagnostics will be stored."
-            }
-        },
-        "newStorageAccountName-B": {
-            "type": "string",
-            "metadata": {
-                "description": "Unique Name for Storage Account where ASAv-B's boot diagnostics will be stored."
-            }
-        },
-        "storageAccountType-A": {
+        "osDiskSKU": {
             "defaultValue": "Standard_LRS",
             "allowedValues": [
-                "Standard_LRS"
+                "Standard_LRS",
+                "Premium_LRS"
             ],
             "type": "string",
             "metadata": {
-                "description": "The type of storage account created."
-            }
-        },
-        "storageAccountType-B": {
-            "defaultValue": "Standard_LRS",
-            "allowedValues": [
-                "Standard_LRS"
-            ],
-            "type": "string",
-            "metadata": {
-                "description": "The type of storage account created."
+                "description": "Choose Storage Type, Standard or Premium"
             }
         },
         "publicIPAddressName-A": {
@@ -277,7 +262,7 @@
             }
         },
         "baseUrl": {
-            "defaultValue": "https://gallery.azure.com/artifact/20151001/cisco.cisco-adaptive-security-appliance-hacisco-asav-four-nic-byol-ha.1.0.2/Artifacts",
+            "defaultValue": "https://github.com/mcrosstx/CiscoASAv_BYOL_4_NIC_HA",
             "type": "string",
             "metadata": {
                 "artifactsBaseUrl": "",
@@ -288,7 +273,8 @@
             "defaultValue": "Standard_D3_v2",
             "allowedValues": [
                 "Standard_D3",
-                "Standard_D3_v2"
+                "Standard_D3_v2",
+                "Standard_DS3_v2"
             ],
             "type": "string",
             "metadata": {
@@ -340,7 +326,6 @@
         "v1s4element4": "[string(variables('vm1Subnet4AddressArray')[3])]",
         "vm1Subnet4Address": "[parameters('subnet4StartAddress')]",
         "vm2Subnet4Address": "[concat(variables('v1s4element1'), '.', variables('v1s4element2'), '.', variables('v1s4element3'), '.', string(add(int(variables('v1s4element4')),1)))]",
-        "availset": "[concat(parameters('vmName-prefix'), '-availabilitySet')]",
         "apiVer": "2015-06-15",
         "publicIPAddressType-A": "Dynamic",
         "publicIPAddressType-B": "Dynamic",
@@ -402,24 +387,6 @@
         }
     },
     "resources": [
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[concat(parameters('newStorageAccountName-A'))]",
-            "apiVersion": "[variables('apiVer')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "accountType": "[parameters('storageAccountType-A')]"
-            }
-        },
-        {
-            "type": "Microsoft.Storage/storageAccounts",
-            "name": "[concat(parameters('newStorageAccountName-B'))]",
-            "apiVersion": "[variables('apiVer')]",
-            "location": "[parameters('location')]",
-            "properties": {
-                "accountType": "[parameters('storageAccountType-B')]"
-            }
-        },
         {
             "type": "Microsoft.Resources/deployments",
             "name": "SettingUpPublicIP-A",
@@ -764,7 +731,7 @@
             ]
         },
         {
-            "name": "[variables('availSet')]",
+            "name": "[parameters('availSet')]",
             "type": "Microsoft.Compute/availabilitySets",
             "apiVersion": "2016-04-30-preview",
             "location": "[parameters('location')]",
@@ -781,12 +748,11 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2015-01-01",
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName-A'))]",
                 "[concat('Microsoft.Resources/deployments/', 'SettingUpPublicIP-A')]",
                 "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-A'),'-Nic1')]",
                 "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-A'),'-Nic2')]",
                 "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-A'),'-Nic3')]",
-                "[concat('Microsoft.Compute/availabilitySets/',variables('availSet'))]"
+                "[concat('Microsoft.Compute/availabilitySets/',parameters('availSet'))]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -814,16 +780,16 @@
                         "value": "[parameters('location')]"
                     },
                     "availSet": {
-                        "value": "[variables('availSet')]"
+                        "value": "[parameters('availSet')]"
                     },
                     "vmSize": {
                         "value": "[parameters('vmSize')]"
                     },
-                    "newStorageAccountName": {
-                        "value": "[parameters('newStorageAccountName-A')]"
-                    },
                     "osDiskMode": {
                         "value": "[parameters('osDiskMode')]"
+                    },
+                    "osDiskSKU": {
+                        "value": "[parameters('osDiskSKU')]"
                     },
                     "authenticationType": {
                         "value": "[variables('authenticationType-A')]"
@@ -845,12 +811,11 @@
             "type": "Microsoft.Resources/deployments",
             "apiVersion": "2015-01-01",
             "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName-B'))]",
                 "[concat('Microsoft.Resources/deployments/', 'SettingUpPublicIP-B')]",
                 "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-B'),'-Nic1')]",
                 "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-B'),'-Nic2')]",
                 "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-B'),'-Nic3')]",
-                "[concat('Microsoft.Compute/availabilitySets/',variables('availSet'))]"
+                "[concat('Microsoft.Compute/availabilitySets/',parameters('availSet'))]"
             ],
             "properties": {
                 "mode": "Incremental",
@@ -878,16 +843,16 @@
                         "value": "[parameters('location')]"
                     },
                     "availSet": {
-                        "value": "[variables('availSet')]"
+                        "value": "[parameters('availSet')]"
                     },
                     "vmSize": {
                         "value": "[parameters('vmSize')]"
                     },
-                    "newStorageAccountName": {
-                        "value": "[parameters('newStorageAccountName-B')]"
-                    },
                     "osDiskMode": {
                         "value": "[parameters('osDiskMode')]"
+                    },
+                    "osDiskSKU": {
+                        "value": "[parameters('osDiskSKU')]"
                     },
                     "authenticationType": {
                         "value": "[variables('authenticationType-B')]"
