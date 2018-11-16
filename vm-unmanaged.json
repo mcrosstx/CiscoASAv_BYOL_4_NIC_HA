@@ -1,0 +1,151 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "imagePublisher":  {
+      "type": "string"
+    },
+    "imageOffer":  {
+      "type": "string"
+    },
+    "imageSKU":  {
+      "type": "string"
+    },
+    "imageVersion":  {
+      "type": "string"
+    },
+  	"vmName": {
+      "type": "string"
+    },
+  	"location": {
+      "type": "string"
+    },
+   	"availSet": {
+      "type": "string"
+    },
+  	"vmSize": {
+      "type": "string"
+    },
+   	"newStorageAccountName": {
+      "type": "string"
+    },
+   	"osDiskMode": {
+      "type": "string"
+    },
+   	"authenticationType": {
+      "type": "string"
+    },
+   	"adminUsername": {
+      "type": "string"
+    },
+    "adminPassword": {
+      "type": "string"
+    },
+  	"sshPublicKey": {
+      "type": "string"
+    }
+  },
+  "variables" : {
+        "sshKeyPath": "[concat('/home/',parameters('adminUsername'),'/.ssh/authorized_keys')]",
+        "OSDiskName": "[concat(parameters('vmName'),'-disk')]",
+  	    "osProfile": "[variables(concat('osprofile',parameters('authenticationType')))]",
+        "osProfilesshPublicKey": {
+            "computername": "[parameters('vmName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": "true",
+                "ssh": {
+                    "publicKeys": [
+                        {
+                            "path": "[variables('sshKeyPath')]",
+                            "keyData": "[parameters('sshPublicKey')]"
+                        }
+                    ]
+                }
+            }
+        },
+        "osProfilepassword": {
+            "computername": "[parameters('vmName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+        }
+ },
+ "resources": [
+
+         {
+            "apiVersion": "2017-03-30",
+            "type": "Microsoft.Compute/virtualMachines",
+            "name": "[parameters('vmName')]",
+            "location": "[parameters('location')]",
+            "plan": {
+                "name": "[parameters('imageSKU')]",
+                "product": "[parameters('imageOffer')]",
+                "publisher": "[parameters('imagePublisher')]"
+            },           
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "availabilitySet": {
+                  "id": "[resourceId('Microsoft.Compute/availabilitySets/', parameters('availSet'))]"
+                },
+                "osProfile": "[variables('osProfile')]",
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[parameters('imagePublisher')]",
+                        "offer": "[parameters('imageOffer')]",
+                        "sku": "[parameters('imageSKU')]",
+                        "version": "[parameters('imageVersion')]"
+                    },
+                    "osDisk": {
+                         "name": "[concat(parameters('vmName'),'-osDisk')]",
+                         "caching": "ReadWrite",
+                         "createOption": "FromImage",
+                         "vhd": {
+                             "uri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName')), '2015-06-15').primaryEndpoints.blob, parameters('newStorageAccountName'),'/',variables('OSDiskName'),'.vhd')]"
+                        }
+                     
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "properties": {
+                                "primary": true
+                            },
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'),'-Nic0'))]"
+                        },
+                        {
+                            "properties": {
+                                "primary": false
+                            },
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'),'-Nic1'))]"
+                        },
+                        {
+                            "properties": {
+                                "primary": false
+                            },
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'),'-Nic2'))]"
+                        },
+                        {
+                            "properties": {
+                                "primary": false
+                            },
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces', concat(parameters('vmName'),'-Nic3'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": "true",
+                        "storageuri": "[concat(reference(resourceId('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName')), '2015-06-15').primaryEndpoints.blob)]"
+                    }
+                }
+               
+            }
+        } 	  
+  	  
+  	  
+  	   ],
+  "outputs": {  }
+}

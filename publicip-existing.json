@@ -1,0 +1,70 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "type": "string"
+    },
+    "publicIPAddressName": {
+      "type": "string"
+    },
+    "publicIPAddressType": {
+      "type": "string"
+    },
+    "dnsPrefix": {
+      "type": "string"
+    },
+    "publicIpRGName": {
+      "type": "string"
+    },
+    "publicIPNewOrExisting" : {
+      "type" : "string"
+    },
+    "apiVer" : {
+      "type" : "string"
+    },
+    "vmName" : {
+      "type" : "string"
+    },
+    "nsgname" : {
+      "type" : "string"
+    },
+    "subnet1StartAddress" : {
+      "type" : "string"
+    }
+
+  },
+  "variables": {
+  },
+  "resources": [    
+  	  {
+	   "type": "Microsoft.Network/networkInterfaces",
+	   "name": "[concat(parameters('vmName'),'-Nic0')]",
+	   "apiVersion": "[parameters('apiVer')]",
+	   "location": "[parameters('location')]",
+	   "properties": {
+	         "ipConfigurations": [
+	              {
+	                "name": "ipconfig1",
+	                "properties": {
+	                   "privateIPAllocationMethod": "Static",
+	                   "privateIPAddress": "[parameters('subnet1StartAddress')]",
+	                    "subnet": {
+	                      "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork', '2015-01-01').outputs.subnet1Ref.value]"
+	                    },
+	                    "publicIPAddress": {                        
+	                       "id": "[resourceId(parameters('publicIpRGName'), 'Microsoft.Network/publicIPAddresses', parameters('publicIPAddressName'))]"     
+	                    }
+	                 }
+	               }
+	           ],
+	           "networkSecurityGroup": {
+	              "id": "[resourceId('Microsoft.Network/networkSecurityGroups', parameters('nsgname'))]"
+	           },
+	           "enableIPForwarding": true
+	     }
+       }
+  ],
+  "outputs": {
+  }
+}

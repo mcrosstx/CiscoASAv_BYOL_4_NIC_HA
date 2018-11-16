@@ -1,0 +1,908 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "location": {
+            "type": "string",
+            "metadata": {
+                "description": "Deployment location"
+            }
+        },
+        "virtualNetworkName": {
+            "defaultValue": "ASAv_Network",
+            "type": "string",
+            "metadata": {
+                "description": "Virtual Network name"
+            }
+        },
+        "virtualNetworkExistingRGName": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Identifies whether to use new or existing Storage Account"
+            }
+        },
+        "virtualNetworkAddressPrefix": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Virtual Network Address prefix"
+            }
+        },
+        "vnetNewOrExisting": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Identifies whether to use new or existing Virtual Network"
+            }
+        },
+        "Subnet1Prefix": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 1 Prefix"
+            }
+        },
+        "Subnet1Name": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 1 Name"
+            }
+        },
+        "subnet1StartAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 1 Starting IP Address"
+            }
+        },
+        "Subnet2Prefix": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 2 Prefix"
+            }
+        },
+        "Subnet2Name": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 2 Name"
+            }
+        },
+        "subnet2StartAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 2 Starting IP Address"
+            }
+        },
+        "Subnet3Prefix": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 3 Prefix"
+            }
+        },
+        "Subnet3Name": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 3 Name"
+            }
+        },
+        "subnet3StartAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 3 Starting IP Address"
+            }
+        },
+        "Subnet4Prefix": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 4 Prefix"
+            }
+        },
+        "Subnet4Name": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 4 Name"
+            }
+        },
+        "subnet4StartAddress": {
+            "type": "string",
+            "metadata": {
+                "description": "Subnet 4 Starting IP Address"
+            }
+        },
+        "adminUsername": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Username for the Virtual Machine."
+            }
+        },
+        "adminPassword": {
+            "defaultValue": "",
+            "type": "securestring",
+            "metadata": {
+                "description": "Password for the Virtual Machine."
+            }
+        },
+        "sshPublicKey": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "SSH Key for the virtual machines"
+            }
+        },
+        "authenticationType": {
+            "defaultValue": "",
+            "allowedValues": [
+                "password",
+                "sshPublicKey"
+            ],
+            "type": "string",
+            "metadata": {
+                "description": "Authentication Type to chose for the Virtual Machines"
+            }
+        },
+        "vmName-Prefix": {
+            "defaultValue": "ASAv",
+            "type": "string",
+            "metadata": {
+                "description": "Prefix for VM name - VMs will be prefix-A and prefix-B."
+            }
+        },
+        "imageVersion": {
+            "type": "string",
+            "defaultValue": "99.2.18",
+            "allowedValues": [
+                "99.2.235",
+                "99.2.18",
+                "99.1.6"
+            ],
+            "metadata": {
+                "description": "Software version to deploy."
+            }
+        },
+        "osDiskMode": {
+            "type": "string",
+            "defaultValue": "managed",
+            "allowedValues": [
+                "managed",
+                "unmanaged"
+            ],
+            "metadata": {
+                "description": "Use managed or unmanaged osDisk (boot diagnostics will use unmanaged disks)"
+            }
+        },
+        "newStorageAccountName-A": {
+            "type": "string",
+            "metadata": {
+                "description": "Unique Name for the Storage Account ASAv-A's boot diagnostics will be stored."
+            }
+        },
+        "newStorageAccountName-B": {
+            "type": "string",
+            "metadata": {
+                "description": "Unique Name for Storage Account where ASAv-B's boot diagnostics will be stored."
+            }
+        },
+        "storageAccountType-A": {
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS"
+            ],
+            "type": "string",
+            "metadata": {
+                "description": "The type of storage account created."
+            }
+        },
+        "storageAccountType-B": {
+            "defaultValue": "Standard_LRS",
+            "allowedValues": [
+                "Standard_LRS"
+            ],
+            "type": "string",
+            "metadata": {
+                "description": "The type of storage account created."
+            }
+        },
+        "publicIPAddressName-A": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Public IP Address for ASAv-A"
+            }
+        },
+        "publicIPAddressName-B": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Name of the Public IP Address for ASAv-B"
+            }
+        },
+        "publicIPDnsName-A": {
+            "defaultValue": "asav-dns-a",
+            "type": "string",
+            "metadata": {
+                "description": "Unique DNS Prefix for the Public IP used to access ASAv-A."
+            }
+        },
+        "publicIPDnsName-B": {
+            "defaultValue": "asav-dns-b",
+            "type": "string",
+            "metadata": {
+                "description": "Unique DNS Prefix for the Public IP used to access ASAv-B."
+            }
+        },
+        "publicIPNewOrExisting-A": {
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing",
+                "none"
+            ],
+            "type": "string",
+            "metadata": {
+                "description": "Indicates whether the Public IP for ASAv-A is new or existing"
+            }
+        },
+        "publicIPNewOrExisting-B": {
+            "defaultValue": "new",
+            "allowedValues": [
+                "new",
+                "existing",
+                "none"
+            ],
+            "type": "string",
+            "metadata": {
+                "description": "Indicates whether the Public IP for ASAv-B is new or existing"
+            }
+        },
+        "publicIPExistingRGName-A": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Resource Group containing existing public IP for ASAv-A"
+            }
+        },
+        "publicIPExistingRGName-B": {
+            "defaultValue": "",
+            "type": "string",
+            "metadata": {
+                "description": "Resource Group containing existing public IP for ASAv-B"
+            }
+        },
+        "baseUrl": {
+            "defaultValue": "https://gallery.azure.com/artifact/20151001/cisco.cisco-adaptive-security-appliance-hacisco-asav-four-nic-byol-ha.1.0.2/Artifacts",
+            "type": "string",
+            "metadata": {
+                "artifactsBaseUrl": "",
+                "description": "URL to acquire other templates"
+            }
+        },
+        "vmSize": {
+            "defaultValue": "Standard_D3_v2",
+            "allowedValues": [
+                "Standard_D3",
+                "Standard_D3_v2"
+            ],
+            "type": "string",
+            "metadata": {
+                "description": "Size of the Virtual Machine"
+            }
+        }
+    },
+    "variables": {
+        "imagePublisher": "cisco",
+        "imageOffer": "cisco-asav",
+        "imageSKU": "asav-azure-byol",
+        "imageVersion": "[parameters('imageVersion')]",
+        "vmName-A": "[concat(parameters('vmName-prefix'),'-a')]",
+        "vmName-B": "[concat(parameters('vmName-prefix'),'-b')]",
+        "OSDiskName-A": "[concat(variables('vmName-A'),'-disk')]",
+        "OSDiskName-B": "[concat(variables('vmName-B'),'-disk')]",
+        "vmStorageAccountContainerName": "vhds",
+        "vnetID": "[resourceId('Microsoft.Network/virtualNetworks', parameters('virtualNetworkName'))]",
+        "subnet1Ref": "[concat(variables('vnetID'),'/subnets/', parameters('Subnet1Name'))]",
+        "subnet2Ref": "[concat(variables('vnetID'),'/subnets/', parameters('Subnet2Name'))]",
+        "subnet3Ref": "[concat(variables('vnetID'),'/subnets/', parameters('Subnet3Name'))]",
+        "subnet4Ref": "[concat(variables('vnetID'),'/subnets/', parameters('Subnet4Name'))]",
+        "nsgname": "[concat(parameters('vmName-Prefix'),'-SSH-SecurityGroup')]",
+        "vm1Subnet1AddressArray": "[split(parameters('subnet1StartAddress'), '.')]",
+        "v1s1element1": "[string(variables('vm1Subnet1AddressArray')[0])]",
+        "v1s1element2": "[string(variables('vm1Subnet1AddressArray')[1])]",
+        "v1s1element3": "[string(variables('vm1Subnet1AddressArray')[2])]",
+        "v1s1element4": "[string(variables('vm1Subnet1AddressArray')[3])]",
+        "vm1Subnet1Address": "[parameters('subnet1StartAddress')]",
+        "vm2Subnet1Address": "[concat(variables('v1s1element1'), '.', variables('v1s1element2'), '.', variables('v1s1element3'), '.', string(add(int(variables('v1s1element4')),1)))]",
+        "vm1Subnet2AddressArray": "[split(parameters('subnet2StartAddress'), '.')]",
+        "v1s2element1": "[string(variables('vm1Subnet2AddressArray')[0])]",
+        "v1s2element2": "[string(variables('vm1Subnet2AddressArray')[1])]",
+        "v1s2element3": "[string(variables('vm1Subnet2AddressArray')[2])]",
+        "v1s2element4": "[string(variables('vm1Subnet2AddressArray')[3])]",
+        "vm1Subnet2Address": "[parameters('subnet2StartAddress')]",
+        "vm2Subnet2Address": "[concat(variables('v1s2element1'), '.', variables('v1s2element2'), '.', variables('v1s2element3'), '.', string(add(int(variables('v1s2element4')),1)))]",
+        "vm1Subnet3AddressArray": "[split(parameters('subnet3StartAddress'), '.')]",
+        "v1s3element1": "[string(variables('vm1Subnet3AddressArray')[0])]",
+        "v1s3element2": "[string(variables('vm1Subnet3AddressArray')[1])]",
+        "v1s3element3": "[string(variables('vm1Subnet3AddressArray')[2])]",
+        "v1s3element4": "[string(variables('vm1Subnet3AddressArray')[3])]",
+        "vm1Subnet3Address": "[parameters('subnet3StartAddress')]",
+        "vm2Subnet3Address": "[concat(variables('v1s3element1'), '.', variables('v1s3element2'), '.', variables('v1s3element3'), '.', string(add(int(variables('v1s3element4')),1)))]",
+        "vm1Subnet4AddressArray": "[split(parameters('subnet4StartAddress'), '.')]",
+        "v1s4element1": "[string(variables('vm1Subnet4AddressArray')[0])]",
+        "v1s4element2": "[string(variables('vm1Subnet4AddressArray')[1])]",
+        "v1s4element3": "[string(variables('vm1Subnet4AddressArray')[2])]",
+        "v1s4element4": "[string(variables('vm1Subnet4AddressArray')[3])]",
+        "vm1Subnet4Address": "[parameters('subnet4StartAddress')]",
+        "vm2Subnet4Address": "[concat(variables('v1s4element1'), '.', variables('v1s4element2'), '.', variables('v1s4element3'), '.', string(add(int(variables('v1s4element4')),1)))]",
+        "availset": "[concat(parameters('vmName-prefix'), '-availabilitySet')]",
+        "apiVer": "2015-06-15",
+        "publicIPAddressType-A": "Dynamic",
+        "publicIPAddressType-B": "Dynamic",
+        "adminUsername-A": "[parameters('adminUsername')]",
+        "adminUsername-B": "[parameters('adminUsername')]",
+        "adminPassword-A": "[parameters('adminPassword')]",
+        "adminPassword-B": "[parameters('adminPassword')]",
+        "authenticationType-A": "[parameters('authenticationType')]",
+        "authenticationType-B": "[parameters('authenticationType')]",
+        "sshPublicKey-A": "[parameters('sshPublicKey')]",
+        "sshPublicKey-B": "[parameters('sshPublicKey')]",
+        "sshKeyPath-A": "[concat('/home/',variables('adminUsername-A'),'/.ssh/authorized_keys')]",
+        "sshKeyPath-B": "[concat('/home/',variables('adminUsername-B'),'/.ssh/authorized_keys')]",
+        "publicIPSetupURL-A": "[concat(parameters('baseUrl'),'/publicip-',parameters('publicIPNewOrExisting-A'),'.json')]",
+        "publicIPSetupURL-B": "[concat(parameters('baseUrl'),'/publicip-',parameters('publicIPNewOrExisting-B'),'.json')]",
+        "virtualNetworkSetupURL": "[concat(parameters('baseUrl'),'/vnet-',parameters('vnetNewOrExisting'),'.json')]",
+        "virtualMachineSetupURL": "[concat(parameters('baseUrl'),'/vm-',parameters('osDiskMode'),'.json')]",
+        "osProfile-A": "[variables(concat('osprofile',variables('authenticationType-A'), '-A')) ]",
+        "osProfile-B": "[variables(concat('osprofile',variables('authenticationType-B'), '-B')) ]",
+        "osProfilesshPublicKey-A": {
+            "computername": "[variables('vmName-A')]",
+            "adminUsername": "[variables('adminUsername-A')]",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": "true",
+                "ssh": {
+                    "publicKeys": [
+                        {
+                            "path": "[variables('sshKeyPath-A')]",
+                            "keyData": "[variables('sshPublicKey-A')]"
+                        }
+                    ]
+                }
+            }
+        },
+        "osProfilesshPublicKey-B": {
+            "computername": "[variables('vmName-B')]",
+            "adminUsername": "[variables('adminUsername-B')]",
+            "linuxConfiguration": {
+                "disablePasswordAuthentication": "true",
+                "ssh": {
+                    "publicKeys": [
+                        {
+                            "path": "[variables('sshKeyPath-B')]",
+                            "keyData": "[variables('sshPublicKey-B')]"
+                        }
+                    ]
+                }
+            }
+        },
+        "osProfilepassword-A": {
+            "computername": "[variables('vmName-A')]",
+            "adminUsername": "[variables('adminUsername-A')]",
+            "adminPassword": "[variables('adminPassword-B')]"
+        },
+        "osProfilepassword-B": {
+            "computername": "[variables('vmName-B')]",
+            "adminUsername": "[variables('adminUsername-A')]",
+            "adminPassword": "[variables('adminPassword-B')]"
+        }
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(parameters('newStorageAccountName-A'))]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "accountType": "[parameters('storageAccountType-A')]"
+            }
+        },
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "name": "[concat(parameters('newStorageAccountName-B'))]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "accountType": "[parameters('storageAccountType-B')]"
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "SettingUpPublicIP-A",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('vmName-Prefix'), '-SSH-SecurityGroup')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('publicIPSetupURL-A')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "publicIPAddressName": {
+                        "value": "[parameters('publicIPAddressName-A')]"
+                    },
+                    "publicIPAddressType": {
+                        "value": "[variables('publicIPAddressType-A')]"
+                    },
+                    "publicIPNewOrExisting": {
+                        "value": "[parameters('publicIPNewOrExisting-A')]"
+                    },
+                    "dnsPrefix": {
+                        "value": "[parameters('publicIPDnsName-A')]"
+                    },
+                    "publicIpRGName": {
+                        "value": "[parameters('publicIPExistingRGName-A')]"
+                    },
+                    "apiVer": {
+                        "value": "[variables('apiVer')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('vmName-A')]"
+                    },
+                    "nsgname": {
+                        "value": "[variables('nsgname')]"
+                    },
+                    "subnet1StartAddress": {
+                        "value": "[variables('vm1Subnet1Address')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "SettingUpPublicIP-B",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]",
+                "[concat('Microsoft.Network/networkSecurityGroups/', parameters('vmName-Prefix'), '-SSH-SecurityGroup')]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('publicIPSetupURL-B')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "publicIPAddressName": {
+                        "value": "[parameters('publicIPAddressName-B')]"
+                    },
+                    "publicIPAddressType": {
+                        "value": "[variables('publicIPAddressType-B')]"
+                    },
+                    "publicIPNewOrExisting": {
+                        "value": "[parameters('publicIPNewOrExisting-B')]"
+                    },
+                    "dnsPrefix": {
+                        "value": "[parameters('publicIPDnsName-B')]"
+                    },
+                    "publicIpRGName": {
+                        "value": "[parameters('publicIPExistingRGName-B')]"
+                    },
+                    "apiVer": {
+                        "value": "[variables('apiVer')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('vmName-B')]"
+                    },
+                    "nsgname": {
+                        "value": "[variables('nsgname')]"
+                    },
+                    "subnet1StartAddress": {
+                        "value": "[variables('vm2Subnet1Address')]"
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "name": "[concat(parameters('vmName-Prefix'),'-SSH-SecurityGroup')]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "SSH-Rule",
+                        "properties": {
+                            "description": "Allow SSH",
+                            "protocol": "Tcp",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "22",
+                            "sourceAddressPrefix": "Internet",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 100,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "UDP-Rule1",
+                        "properties": {
+                            "description": "Allow UDP",
+                            "protocol": "UDP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "500",
+                            "sourceAddressPrefix": "Internet",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 101,
+                            "direction": "Inbound"
+                        }
+                    },
+                    {
+                        "name": "UDP-Rule2",
+                        "properties": {
+                            "description": "Allow UDP",
+                            "protocol": "UDP",
+                            "sourcePortRange": "*",
+                            "destinationPortRange": "4500",
+                            "sourceAddressPrefix": "Internet",
+                            "destinationAddressPrefix": "*",
+                            "access": "Allow",
+                            "priority": 102,
+                            "direction": "Inbound"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "type": "Microsoft.Resources/deployments",
+            "name": "SettingUpVirtualNetwork",
+            "apiVersion": "2015-01-01",
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('virtualNetworkSetupURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "virtualNetworkName": {
+                        "value": "[parameters('virtualNetworkName')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "virtualNetworkAddressPrefix": {
+                        "value": "[parameters('virtualNetworkAddressPrefix')]"
+                    },
+                    "Subnet1Name": {
+                        "value": "[parameters('Subnet1Name')]"
+                    },
+                    "Subnet1Prefix": {
+                        "value": "[parameters('Subnet1Prefix')]"
+                    },
+                    "Subnet2Name": {
+                        "value": "[parameters('Subnet2Name')]"
+                    },
+                    "Subnet2Prefix": {
+                        "value": "[parameters('Subnet2Prefix')]"
+                    },
+                    "Subnet3Name": {
+                        "value": "[parameters('Subnet3Name')]"
+                    },
+                    "Subnet3Prefix": {
+                        "value": "[parameters('Subnet3Prefix')]"
+                    },
+                    "Subnet4Name": {
+                        "value": "[parameters('Subnet4Name')]"
+                    },
+                    "Subnet4Prefix": {
+                        "value": "[parameters('Subnet4Prefix')]"
+                    },
+                    "vnetExistingRGName": {
+                        "value": "[parameters('virtualNetworkExistingRGName')]"
+                    }
+                }
+            },
+            "dependsOn": []
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmName-A'),'-Nic1')]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('vm1Subnet2Address')]",
+                            "subnet": {
+                                "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork', '2015-01-01').outputs.subnet2Ref.value]"
+                            }
+                        }
+                    }
+                ],
+                "enableIPForwarding": true
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmName-B'),'-Nic1')]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('vm2Subnet2Address')]",
+                            "subnet": {
+                                "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork', '2015-01-01').outputs.subnet2Ref.value]"
+                            }
+                        }
+                    }
+                ],
+                "enableIPForwarding": true
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmName-A'),'-Nic2')]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('vm1Subnet3Address')]",
+                            "subnet": {
+                                "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork', '2015-01-01').outputs.subnet3Ref.value]"
+                            }
+                        }
+                    }
+                ],
+                "enableIPForwarding": true
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmName-B'),'-Nic2')]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('vm2Subnet3Address')]",
+                            "subnet": {
+                                "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork', '2015-01-01').outputs.subnet3Ref.value]"
+                            }
+                        }
+                    }
+                ],
+                "enableIPForwarding": true
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmName-A'),'-Nic3')]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('vm1Subnet4Address')]",
+                            "subnet": {
+                                "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork', '2015-01-01').outputs.subnet4Ref.value]"
+                            }
+                        }
+                    }
+                ],
+                "enableIPForwarding": true
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]"
+            ]
+        },
+        {
+            "type": "Microsoft.Network/networkInterfaces",
+            "name": "[concat(variables('vmName-B'),'-Nic3')]",
+            "apiVersion": "[variables('apiVer')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "ipconfig1",
+                        "properties": {
+                            "privateIPAllocationMethod": "Static",
+                            "privateIPAddress": "[variables('vm2Subnet4Address')]",
+                            "subnet": {
+                                "id": "[reference('Microsoft.Resources/deployments/SettingUpVirtualNetwork', '2015-01-01').outputs.subnet4Ref.value]"
+                            }
+                        }
+                    }
+                ],
+                "enableIPForwarding": true
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpVirtualNetwork')]"
+            ]
+        },
+        {
+            "name": "[variables('availSet')]",
+            "type": "Microsoft.Compute/availabilitySets",
+            "apiVersion": "2016-04-30-preview",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Aligned"
+            },
+            "properties": {
+                "platformFaultDomainCount": "2",
+                "platformUpdateDomainCount": "5"
+            }
+        },
+        {
+            "name": "SettingUpVirtualMachine-A",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName-A'))]",
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpPublicIP-A')]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-A'),'-Nic1')]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-A'),'-Nic2')]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-A'),'-Nic3')]",
+                "[concat('Microsoft.Compute/availabilitySets/',variables('availSet'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('virtualMachineSetupURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "imagePublisher": {
+                        "value": "[variables('imagePublisher')]"
+                    },
+                    "imageOffer": {
+                        "value": "[variables('imageOffer')]"
+                    },
+                    "imageSKU": {
+                        "value": "[variables('imageSKU')]"
+                    },
+                    "imageVersion": {
+                        "value": "[variables('imageVersion')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('vmName-A')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "availSet": {
+                        "value": "[variables('availSet')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('vmSize')]"
+                    },
+                    "newStorageAccountName": {
+                        "value": "[parameters('newStorageAccountName-A')]"
+                    },
+                    "osDiskMode": {
+                        "value": "[parameters('osDiskMode')]"
+                    },
+                    "authenticationType": {
+                        "value": "[variables('authenticationType-A')]"
+                    },
+                    "adminUsername": {
+                        "value": "[variables('adminUsername-A')]"
+                    },
+                    "adminPassword": {
+                        "value": "[variables('adminPassword-A')]"
+                    },
+                    "sshPublicKey": {
+                        "value": "[variables('sshPublicKey-A')]"
+                    }
+                }
+            }
+        },
+        {
+            "name": "SettingUpVirtualMachine-B",
+            "type": "Microsoft.Resources/deployments",
+            "apiVersion": "2015-01-01",
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', parameters('newStorageAccountName-B'))]",
+                "[concat('Microsoft.Resources/deployments/', 'SettingUpPublicIP-B')]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-B'),'-Nic1')]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-B'),'-Nic2')]",
+                "[concat('Microsoft.Network/networkInterfaces/',variables('vmName-B'),'-Nic3')]",
+                "[concat('Microsoft.Compute/availabilitySets/',variables('availSet'))]"
+            ],
+            "properties": {
+                "mode": "Incremental",
+                "templateLink": {
+                    "uri": "[variables('virtualMachineSetupURL')]",
+                    "contentVersion": "1.0.0.0"
+                },
+                "parameters": {
+                    "imagePublisher": {
+                        "value": "[variables('imagePublisher')]"
+                    },
+                    "imageOffer": {
+                        "value": "[variables('imageOffer')]"
+                    },
+                    "imageSKU": {
+                        "value": "[variables('imageSKU')]"
+                    },
+                    "imageVersion": {
+                        "value": "[variables('imageVersion')]"
+                    },
+                    "vmName": {
+                        "value": "[variables('vmName-B')]"
+                    },
+                    "location": {
+                        "value": "[parameters('location')]"
+                    },
+                    "availSet": {
+                        "value": "[variables('availSet')]"
+                    },
+                    "vmSize": {
+                        "value": "[parameters('vmSize')]"
+                    },
+                    "newStorageAccountName": {
+                        "value": "[parameters('newStorageAccountName-B')]"
+                    },
+                    "osDiskMode": {
+                        "value": "[parameters('osDiskMode')]"
+                    },
+                    "authenticationType": {
+                        "value": "[variables('authenticationType-B')]"
+                    },
+                    "adminUsername": {
+                        "value": "[variables('adminUsername-B')]"
+                    },
+                    "adminPassword": {
+                        "value": "[variables('adminPassword-B')]"
+                    },
+                    "sshPublicKey": {
+                        "value": "[variables('sshPublicKey-B')]"
+                    }
+                }
+            }
+        }
+    ]
+}

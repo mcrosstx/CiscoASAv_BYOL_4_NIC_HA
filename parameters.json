@@ -1,0 +1,111 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmName-Prefix": {
+            "value": "testasa"
+        },
+        "imageVersion": {
+            "value": "99.2.18"
+        },
+        "adminUsername": {
+            "value": "mcross"
+        },
+        "adminPassword": {
+            "value": null
+        },
+        "authenticationType": {
+            "value": "password"
+        },
+        "vmSize": {
+            "value": "Standard_D3_v2"
+        },
+        "location": {
+            "value": "southcentralus"
+        },
+        "osDiskMode": {
+            "value": "managed"
+        },
+        "newStorageAccountName-A": {
+            "value": "testasaasa"
+        },
+        "newStorageAccountName-B": {
+            "value": "testasabsa"
+        },
+        "storageAccountType-A": {
+            "value": "Standard_LRS"
+        },
+        "storageAccountType-B": {
+            "value": "Standard_LRS"
+        },
+        "publicIPAddressName-A": {
+            "value": "testasa-a-pip"
+        },
+        "publicIPAddressName-B": {
+            "value": "testasa-b-pip"
+        },
+        "publicIPDnsName-A": {
+            "value": "testasa-a-pip"
+        },
+        "publicIPDnsName-B": {
+            "value": "testasa-b-pip"
+        },
+        "publicIPNewOrExisting-A": {
+            "value": "new"
+        },
+        "publicIPNewOrExisting-B": {
+            "value": "new"
+        },
+        "publicIPExistingRGName-A": {
+            "value": "RG-Michael.Cross-A"
+        },
+        "publicIPExistingRGName-B": {
+            "value": "RG-Michael.Cross-A"
+        },
+        "virtualNetworkName": {
+            "value": "RG-Michael.Cross-vnet"
+        },
+        "Subnet1Name": {
+            "value": "management"
+        },
+        "Subnet1Prefix": {
+            "value": "10.1.2.0/24"
+        },
+        "Subnet2Name": {
+            "value": "vpn"
+        },
+        "Subnet2Prefix": {
+            "value": "10.1.3.0/24"
+        },
+        "Subnet3Name": {
+            "value": "inside"
+        },
+        "Subnet3Prefix": {
+            "value": "10.1.4.0/24"
+        },
+        "Subnet4Name": {
+            "value": "outside"
+        },
+        "Subnet4Prefix": {
+            "value": "10.1.5.0/24"
+        },
+        "vnetNewOrExisting": {
+            "value": "existing"
+        },
+        "virtualNetworkExistingRGName": {
+            "value": "RG-Michael.Cross"
+        },
+        "subnet1StartAddress": {
+            "value": "10.1.2.4"
+        },
+        "subnet2StartAddress": {
+            "value": "10.1.3.4"
+        },
+        "subnet3StartAddress": {
+            "value": "10.1.4.4"
+        },
+        "subnet4StartAddress": {
+            "value": "10.1.5.4"
+        }
+    }
+}
